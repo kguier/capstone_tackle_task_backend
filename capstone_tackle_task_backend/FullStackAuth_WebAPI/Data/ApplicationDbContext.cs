@@ -9,6 +9,16 @@ namespace FullStackAuth_WebAPI.Data
     {
         public DbSet<Car> Cars { get; set; }
 
+        public DbSet<Entry> Entries { get; set; }
+
+        public DbSet<Event> Events { get; set; }
+
+        public DbSet<TaskItem> TaskItems { get; set; }
+
+        public DbSet<TaskList> TaskLists { get; set; }
+
+        public DbSet<User> Users { get; set; }
+
         public ApplicationDbContext(DbContextOptions options)
     : base(options)
         {
