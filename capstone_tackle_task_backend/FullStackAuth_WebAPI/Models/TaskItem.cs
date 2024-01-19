@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FullStackAuth_WebAPI.Models
 {
-    public class Task
+    public class TaskItem
     {
 
         [Key]
