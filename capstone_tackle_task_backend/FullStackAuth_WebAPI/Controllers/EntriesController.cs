@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using FullStackAuth_WebAPI.Data;
+using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -8,6 +9,13 @@ namespace FullStackAuth_WebAPI.Controllers
     [ApiController]
     public class EntriesController : ControllerBase
     {
+        private readonly ApplicationDbContext _context;
+
+        public EntriesController(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
         // GET: api/<EntriesController>
         [HttpGet]
         public IEnumerable<string> Get()
