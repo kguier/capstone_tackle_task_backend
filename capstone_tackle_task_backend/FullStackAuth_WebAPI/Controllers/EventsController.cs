@@ -1,11 +1,18 @@
 ﻿using FullStackAuth_WebAPI.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using FullStackAuth_WebAPI.DataTransferObjects;
+using FullStackAuth_WebAPI.Models;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
+using Org.BouncyCastle.Bcpg;
+using MySql.Data.MySqlClient;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace FullStackAuth_WebAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/Events")]
     [ApiController]
     public class EventsController : ControllerBase
     {
@@ -16,11 +23,21 @@ namespace FullStackAuth_WebAPI.Controllers
             _context = context;
         }
 
-        // GET: api/<EventsController>
-        [HttpGet]
-        public IEnumerable<string> Get()
+        // GET: api/Events
+        [HttpGet, Authorize]
+        public IActionResult GetAllEvents()
         {
-            return new string[] { "value1", "value2" };
+            try
+            {
+                string userId = User.FindFirstValue("id");
+                var events = _context.Events.Where(e => e.UserId.Equals(userId));
+                return StatusCode(200, events);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+            
         }
 
         // GET api/<EventsController>/5
@@ -30,22 +47,63 @@ namespace FullStackAuth_WebAPI.Controllers
             return "value";
         }
 
-        // POST api/<EventsController>
-        [HttpPost]
-        public void Post([FromBody] string value)
+        // POST api/Events
+        [HttpPost, Authorize]
+        public IActionResult Post([FromBody] Event data)
         {
+            string userId = User.FindFirstValue("id");
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            data.UserId = userId;
+            _context.Events.Add(data);
+            _context.SaveChanges();
+            return StatusCode(201, data);
         }
 
-        // PUT api/<EventsController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        // PUT api/Events/5
+        [HttpPut("{id}"), Authorize]
+        public IActionResult PutEvent(int id, [FromBody] Event updatedEvent)
         {
-        }
+            string userId = User.FindFirstValue("id");
 
-        // DELETE api/<EventsController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var existingEvent = _context.Events.Find(id);
+
+            if (id != existingEvent.Id)
+            {
+                return BadRequest("ID Not Found");
+            }
+
+            if (existingEvent == null)
+            {
+                return NotFound("Event not found.");
+            }
+
+            existingEvent.Title = updatedEvent.Title;
+            existingEvent.DateTime = updatedEvent.DateTime;
+            existingEvent.Description = updatedEvent.Description;
+            _context.SaveChanges();
+
+            return StatusCode(201, updatedEvent);
+
+
+    }
+
+        // DELETE api/Events/5
+        /*[HttpDelete("{id}"), Authorize]
+        public IActionResult Delete(int id)
         {
-        }
+            
+        }*/
+            
+
     }
 }

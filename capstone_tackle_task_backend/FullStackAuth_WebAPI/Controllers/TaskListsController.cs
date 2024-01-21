@@ -1,4 +1,5 @@
 ﻿using FullStackAuth_WebAPI.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -24,7 +25,7 @@ namespace FullStackAuth_WebAPI.Controllers
         }
 
         // GET api/<TaskListsController>/5
-        [HttpGet("{id}")]
+        [HttpGet("{id}"),]
         public string Get(int id)
         {
             return "value";
@@ -42,8 +43,8 @@ namespace FullStackAuth_WebAPI.Controllers
         {
         }
 
-        // DELETE api/<TaskListsController>/5
-        [HttpDelete("{id}")]
+        // DELETE api/TaskLists/5
+        [HttpDelete("{id}"), Authorize]
         public void Delete(int id)
         {
         }
