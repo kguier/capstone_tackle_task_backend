@@ -1,12 +1,14 @@
 ﻿using FullStackAuth_WebAPI.Data;
+using FullStackAuth_WebAPI.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace FullStackAuth_WebAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/taskLists")]
     [ApiController]
     public class TaskListsController : ControllerBase
     {
@@ -17,11 +19,20 @@ namespace FullStackAuth_WebAPI.Controllers
             _context = context;
         }
 
-        // GET: api/<TaskListsController>
-        [HttpGet]
-        public IEnumerable<string> Get()
+        // GET: api/TaskLists
+        [HttpGet, Authorize]
+        public IActionResult GetAllTaskLists()
         {
-            return new string[] { "value1", "value2" };
+            try
+            {
+                string userId = User.FindFirstValue("id");
+                var taskLists = _context.TaskLists.Where(e => e.UserId.Equals(userId));
+                return StatusCode(200, taskLists);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         // GET api/<TaskListsController>/5
@@ -31,16 +42,51 @@ namespace FullStackAuth_WebAPI.Controllers
             return "value";
         }
 
-        // POST api/<TaskListsController>
-        [HttpPost]
-        public void Post([FromBody] string value)
+        // POST api/TaskLists
+        [HttpPost, Authorize]
+        public IActionResult Post([FromBody] TaskList data)
         {
+            string userId = User.FindFirstValue("id");
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            data.UserId = userId;
+            _context.TaskLists.Add(data);
+            _context.SaveChanges();
+            return StatusCode(201, data);
         }
 
-        // PUT api/<TaskListsController>/5
+        // PUT api/TaskLists/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public IActionResult PutTaskList(int id, [FromBody] TaskList updatedTaskList)
         {
+            string userId = User.FindFirstValue("id");
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var existingTaskList = _context.TaskLists.Find(id);
+
+            if (id != existingTaskList.Id)
+            {
+                return BadRequest("ID Not Found");
+            }
+
+            if (existingTaskList == null)
+            {
+                return NotFound("List not found.");
+            }
+
+            existingTaskList.Name = updatedTaskList.Name;
+            _context.SaveChanges();
+
+            return StatusCode(201, updatedTaskList);
+
         }
 
         // DELETE api/TaskLists/5

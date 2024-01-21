@@ -5,7 +5,6 @@ using FullStackAuth_WebAPI.DataTransferObjects;
 using FullStackAuth_WebAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
-using Org.BouncyCastle.Bcpg;
 using MySql.Data.MySqlClient;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
