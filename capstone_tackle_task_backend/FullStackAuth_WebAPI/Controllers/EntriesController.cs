@@ -1,11 +1,15 @@
 ﻿using FullStackAuth_WebAPI.Data;
+using FullStackAuth_WebAPI.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace FullStackAuth_WebAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/Entries")]
     [ApiController]
     public class EntriesController : ControllerBase
     {
@@ -16,11 +20,20 @@ namespace FullStackAuth_WebAPI.Controllers
             _context = context;
         }
 
-        // GET: api/<EntriesController>
-        [HttpGet]
-        public IEnumerable<string> Get()
+        // GET: api/Entries
+        [HttpGet, Authorize]
+        public IActionResult GetAllEntries()
         {
-            return new string[] { "value1", "value2" };
+            try
+            {
+                string userId = User.FindFirstValue("id");
+                var entries = _context.Entries.Where(e => e.UserId.Equals(userId));
+                return StatusCode(200, entries);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         // GET api/<EntriesController>/5
@@ -30,16 +43,52 @@ namespace FullStackAuth_WebAPI.Controllers
             return "value";
         }
 
-        // POST api/<EntriesController>
-        [HttpPost]
-        public void Post([FromBody] string value)
+        // POST api/Entries
+        [HttpPost, Authorize]
+        public IActionResult Post([FromBody] Entry data)
         {
+            string userId = User.FindFirstValue("id");
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            data.UserId = userId;
+            _context.Entries.Add(data);
+            _context.SaveChanges();
+            return StatusCode(201, data);
         }
 
-        // PUT api/<EntriesController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        // PUT api/Entries/5
+        [HttpPut("{id}"), Authorize]
+        public IActionResult PutEntry(int id, [FromBody] Entry updatedEntry)
         {
+            string userId = User.FindFirstValue("id");
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var existingEntry = _context.Entries.Find(id);
+
+            if (id != existingEntry.Id)
+            {
+                return BadRequest("ID Not Found");
+            }
+
+            if (existingEntry == null)
+            {
+                return NotFound("List not found.");
+            }
+
+            existingEntry.Title = updatedEntry.Title;
+            existingEntry.EntryContent = updatedEntry.EntryContent;
+            existingEntry.Timestamp = updatedEntry.Timestamp;
+            _context.SaveChanges();
+
+            return StatusCode(201, updatedEntry);
         }
 
         // DELETE api/<EntriesController>/5

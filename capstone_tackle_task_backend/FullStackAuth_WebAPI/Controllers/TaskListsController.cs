@@ -60,7 +60,7 @@ namespace FullStackAuth_WebAPI.Controllers
         }
 
         // PUT api/TaskLists/5
-        [HttpPut("{id}")]
+        [HttpPut("{id}"), Authorize]
         public IActionResult PutTaskList(int id, [FromBody] TaskList updatedTaskList)
         {
             string userId = User.FindFirstValue("id");

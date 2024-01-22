@@ -1,11 +1,14 @@
 ﻿using FullStackAuth_WebAPI.Data;
+using FullStackAuth_WebAPI.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace FullStackAuth_WebAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/TaskItems")]
     [ApiController]
     public class TaskItemsController : ControllerBase
     {
@@ -15,11 +18,20 @@ namespace FullStackAuth_WebAPI.Controllers
         {
             _context = context;
         }
-        // GET: api/<TaskItemsController>
-        [HttpGet]
-        public IEnumerable<string> Get()
+        // GET: api/TaskItems
+        [HttpGet, Authorize]
+        public IActionResult GetAllTaskItemsInAList()
         {
-            return new string[] { "value1", "value2" };
+            try
+            {
+                string userId = User.FindFirstValue("id");
+                var taskItems = _context.TaskItems.Where(e => e.TaskListId.Equals(userId));
+                return StatusCode(200, taskItems);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         // GET api/<TaskItemsController>/5
