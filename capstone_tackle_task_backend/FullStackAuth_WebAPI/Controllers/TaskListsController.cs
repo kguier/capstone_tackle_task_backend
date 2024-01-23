@@ -91,8 +91,24 @@ namespace FullStackAuth_WebAPI.Controllers
 
         // DELETE api/TaskLists/5
         [HttpDelete("{id}"), Authorize]
-        public void Delete(int id)
+        public IActionResult DeleteTaskList(int id)
         {
+            string userId = User.FindFirstValue("id");
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var existingTaskList = _context.TaskLists.Find(id);
+
+            if (existingTaskList == null)
+            {
+                return NotFound("Event not found.");
+            }
+            _context.TaskLists.Remove(existingTaskList);
+            _context.SaveChanges();
+            return NoContent();
         }
     }
 }
