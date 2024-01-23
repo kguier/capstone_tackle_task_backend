@@ -91,10 +91,26 @@ namespace FullStackAuth_WebAPI.Controllers
             return StatusCode(201, updatedEntry);
         }
 
-        // DELETE api/<EntriesController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
+        // DELETE api/<Entries/5
+        [HttpDelete("{id}"), Authorize]
+        public IActionResult DeleteEntry(int id)
         {
+            string userId = User.FindFirstValue("id");
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var existingEntry = _context.Entries.Find(id);
+
+            if (existingEntry == null)
+            {
+                return NotFound("Event not found.");
+            }
+            _context.Entries.Remove(existingEntry);
+            _context.SaveChanges();
+            return NoContent();
         }
     }
 }
