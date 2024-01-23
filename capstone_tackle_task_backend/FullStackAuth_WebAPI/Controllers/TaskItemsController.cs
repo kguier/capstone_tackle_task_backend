@@ -3,6 +3,7 @@ using FullStackAuth_WebAPI.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -41,11 +42,24 @@ namespace FullStackAuth_WebAPI.Controllers
             return "value";
         }
 
-        // POST api/<TaskItemsController>
-        [HttpPost]
-        public void Post([FromBody] string value)
+        // POST api/TaskItems
+       /* [HttpPost, Authorize]
+        public IActionResult PostTaskItem([FromBody] TaskItem data)
         {
-        }
+            string userId = User.FindFirstValue("id");
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            int taskListId = User.FindFirstValue("taskListId");
+
+            data.TaskListId = taskListId;
+            _context.TaskItems.Add(data);
+            _context.SaveChanges();
+            return StatusCode(201, data);
+        }*/
 
         // PUT api/<TaskItemsController>/5
         [HttpPut("{id}")]

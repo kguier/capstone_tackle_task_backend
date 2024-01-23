@@ -26,6 +26,7 @@ namespace FullStackAuth_WebAPI.Controllers
         [HttpGet, Authorize]
         public IActionResult GetAllEvents()
         {
+            
             try
             {
                 string userId = User.FindFirstValue("id");
@@ -97,12 +98,27 @@ namespace FullStackAuth_WebAPI.Controllers
     }
 
         // DELETE api/Events/5
-        /*[HttpDelete("{id}"), Authorize]
-        public IActionResult Delete(int id)
+        [HttpDelete("{id}"), Authorize]
+        public IActionResult DeleteEvent(int id)
         {
-            
-        }*/
-            
+            string userId = User.FindFirstValue("id");
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var existingEvent = _context.Events.Find(id);
+
+            if (existingEvent == null)
+            {
+                return NotFound("Event not found.");
+            }
+            _context.Events.Remove(existingEvent);
+            _context.SaveChanges();
+            return NoContent();
+        }
+
 
     }
 }
