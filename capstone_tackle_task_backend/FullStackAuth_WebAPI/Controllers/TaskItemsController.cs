@@ -89,9 +89,25 @@ namespace FullStackAuth_WebAPI.Controllers
         }
 
         // DELETE api/<TaskItemsController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
+        [HttpDelete("{id}"), Authorize]
+        public IActionResult DeleteTaskItem(int id)
         {
+            string userId = User.FindFirstValue("id");
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var existingTaskItem = _context.TaskItems.Find(id);
+
+            if (existingTaskItem == null)
+            {
+                return NotFound("Task not found.");
+            }
+            _context.TaskItems.Remove(existingTaskItem);
+            _context.SaveChanges();
+            return NoContent();
         }
     }
 }
