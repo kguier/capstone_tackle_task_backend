@@ -26,18 +26,17 @@ namespace FullStackAuth_WebAPI.Controllers
         [HttpGet, Authorize]
         public IActionResult GetAllEvents()
         {
-            
-            try
+
+            string userId = User.FindFirstValue("id");
+
+            if (string.IsNullOrEmpty(userId))
             {
-                string userId = User.FindFirstValue("id");
-                var events = _context.Events.Where(e => e.UserId.Equals(userId));
-                return StatusCode(200, events);
+                return Unauthorized();
             }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
-            
+
+            var events = _context.Events.Where(e => e.UserId.Equals(userId));
+            return StatusCode(200, events);
+
         }
 
         // GET api/<EventsController>/5

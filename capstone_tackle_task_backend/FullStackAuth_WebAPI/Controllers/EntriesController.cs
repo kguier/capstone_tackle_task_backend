@@ -24,16 +24,15 @@ namespace FullStackAuth_WebAPI.Controllers
         [HttpGet, Authorize]
         public IActionResult GetAllEntries()
         {
-            try
+            string userId = User.FindFirstValue("id");
+
+            if (string.IsNullOrEmpty(userId))
             {
-                string userId = User.FindFirstValue("id");
-                var entries = _context.Entries.Where(e => e.UserId.Equals(userId));
-                return StatusCode(200, entries);
+                return Unauthorized();
             }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
+
+            var entries = _context.Entries.Where(e => e.UserId.Equals(userId));
+            return StatusCode(200, entries);
         }
 
         // GET api/<EntriesController>/5

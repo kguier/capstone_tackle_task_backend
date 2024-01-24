@@ -21,19 +21,18 @@ namespace FullStackAuth_WebAPI.Controllers
         }
         // GET: api/TaskItems
         [HttpGet, Authorize]
-        public IActionResult GetAllTaskItemsInAList()
+       /* public IActionResult GetAllTaskItemsInAList()
         {
-            try
+            string userId = User.FindFirstValue("id");
+
+            if (string.IsNullOrEmpty(userId))
             {
-                string userId = User.FindFirstValue("id");
-                var taskItems = _context.TaskItems.Where(e => e.TaskListId.Equals(userId));
-                return StatusCode(200, taskItems);
+                return Unauthorized();
             }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
-        }
+
+            var taskItems = _context.TaskItems.Where(e => e.TaskListId.Equals(tas));
+            return StatusCode(200, taskItems);
+        }*/
 
         // GET api/<TaskItemsController>/5
         [HttpGet("{id}")]
@@ -43,7 +42,7 @@ namespace FullStackAuth_WebAPI.Controllers
         }
 
         // POST api/TaskItems
-       /* [HttpPost, Authorize]
+        [HttpPost, Authorize]
         public IActionResult PostTaskItem([FromBody] TaskItem data)
         {
             string userId = User.FindFirstValue("id");
@@ -53,18 +52,40 @@ namespace FullStackAuth_WebAPI.Controllers
                 return Unauthorized();
             }
 
-            int taskListId = User.FindFirstValue("taskListId");
-
-            data.TaskListId = taskListId;
             _context.TaskItems.Add(data);
             _context.SaveChanges();
             return StatusCode(201, data);
-        }*/
+        }
 
-        // PUT api/<TaskItemsController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        // PUT api/TaskItems/5
+        [HttpPut("{id}"), Authorize]
+        public IActionResult PutTaskItem(int id, [FromBody] TaskItem updatedTaskItem)
         {
+            string userId = User.FindFirstValue("id");
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var existingTaskItem = _context.TaskItems.Find(id);
+
+            if (id != existingTaskItem.Id)
+            {
+                return BadRequest("ID Not Found");
+            }
+
+            if (existingTaskItem == null)
+            {
+                return NotFound("Task not found.");
+            }
+
+            existingTaskItem.Content = updatedTaskItem.Content;
+            existingTaskItem.IsComplete = updatedTaskItem.IsComplete;
+            existingTaskItem.TaskListId = updatedTaskItem.TaskListId;
+            _context.SaveChanges();
+
+            return StatusCode(201, updatedTaskItem);
         }
 
         // DELETE api/<TaskItemsController>/5

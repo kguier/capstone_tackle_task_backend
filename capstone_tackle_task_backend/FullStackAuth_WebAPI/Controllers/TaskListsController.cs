@@ -1,4 +1,5 @@
 ﻿using FullStackAuth_WebAPI.Data;
+using FullStackAuth_WebAPI.DataTransferObjects;
 using FullStackAuth_WebAPI.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -23,24 +24,23 @@ namespace FullStackAuth_WebAPI.Controllers
         [HttpGet, Authorize]
         public IActionResult GetAllTaskLists()
         {
-            try
+            string userId = User.FindFirstValue("id");
+
+            if (string.IsNullOrEmpty(userId))
             {
-                string userId = User.FindFirstValue("id");
-                var taskLists = _context.TaskLists.Where(e => e.UserId.Equals(userId));
-                return StatusCode(200, taskLists);
+                return Unauthorized();
             }
-            catch (Exception ex)
+
+            var taskLists = _context.TaskLists.Select(l => new TaskListDTO
             {
-                return StatusCode(500, ex.Message);
-            }
+                Id = l.Id,
+                Name = l.Name,
+                TaskItems = _context.TaskItems.Where(t => t.TaskListId == l.Id).ToList()
+            }) ;
+            
+            return StatusCode(200, taskLists);
         }
 
-        // GET api/<TaskListsController>/5
-        [HttpGet("{id}"),]
-        public string Get(int id)
-        {
-            return "value";
-        }
 
         // POST api/TaskLists
         [HttpPost, Authorize]

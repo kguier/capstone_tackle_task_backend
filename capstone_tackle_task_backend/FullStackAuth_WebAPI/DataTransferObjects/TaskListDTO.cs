@@ -1,18 +1,16 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using FullStackAuth_WebAPI.Models;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 
-namespace FullStackAuth_WebAPI.Models
+namespace FullStackAuth_WebAPI.DataTransferObjects
 {
-    public class TaskList
+    public class TaskListDTO
     {
-        [Key]
         public int Id { get; set; }
 
         public string Name { get; set; }
 
         public ICollection<TaskItem> TaskItems { get; set; }
 
-        [ForeignKey("User")]
-        public string UserId { get; set; }
     }
 }
