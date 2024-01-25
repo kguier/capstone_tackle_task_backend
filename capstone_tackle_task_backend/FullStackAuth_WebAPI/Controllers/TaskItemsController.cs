@@ -30,7 +30,7 @@ namespace FullStackAuth_WebAPI.Controllers
                 return Unauthorized();
             }
 
-            var taskItems = _context.TaskItems.Where(e => e.TaskListId.Equals(tas));
+            
             return StatusCode(200, taskItems);
         }*/
 
